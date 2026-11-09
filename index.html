@@ -1,0 +1,109 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RELATÓRIO NOTIFICAÇÕES</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--b:#3260AD;--bd:#2D55A8;--t:#156082;--bg:#fff;--tx:#1d2a3a;--mu:#6b7686;--ln:#dfe5ee}
+*{box-sizing:border-box}body{margin:0;font-family:Aptos,"Segoe UI",Arial,sans-serif;color:var(--tx);background:var(--bg)}
+header{padding:14px 24px;border-bottom:4px solid;border-image:linear-gradient(90deg,#1b8f5a,#3260AD) 1;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+h1{margin:0;font-size:22px;color:var(--b)}h2{margin:0;font-size:30px;color:var(--b)}h3{margin:2px 0 14px;font-size:18px;color:var(--b)}
+.sp{flex:1}button,select,input{font:inherit;padding:6px 10px;border:1px solid var(--ln);border-radius:8px;background:#fff}
+button{cursor:pointer}button.on{background:var(--b);color:#fff;border-color:var(--b)}button.x{background:#1b8f5a;color:#fff;border-color:#1b8f5a}
+nav{padding:8px 24px;display:flex;gap:8px;flex-wrap:wrap}.sub{background:#f1f5fb}
+.bar{padding:8px 24px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+main{padding:12px 24px 40px}.pn{display:none}.pn.on{display:block}
+.card{border:2px solid var(--bd);border-radius:26px;padding:14px 18px;margin:12px 0;position:relative}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:800px){.g2{grid-template-columns:1fr}}
+.cv{position:relative;height:270px}.cap{font:12px "Courier New",monospace;color:#333;margin-top:6px}
+.badge{position:absolute;top:-14px;right:18px;background:#2F5FAE;color:#fff;border-radius:50%/60%;padding:10px 26px;text-align:center;font-size:11px;font-weight:700}
+.badge b{display:block;font-size:24px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin-top:8px}th{background:var(--b);color:#fff;text-align:left}th,td{padding:6px 10px;border-bottom:1px solid var(--ln)}
+.mu{color:var(--mu)}.tot{font-weight:700;color:var(--b);text-align:center;margin-top:8px}
+</style></head><body>
+<header><h1>RELATÓRIO NOTIFICAÇÕES</h1><span class="sp"></span><span id="st" class="mu"></span>
+<button class="x" onclick="$('fi').click()">Subir planilha relatório</button><input id="fi" type="file" accept=".xls,.xlsx" multiple hidden>
+<button onclick="if(confirm('Apagar dados salvos neste navegador?')){D=[];dbSet([]).then(init)}">Limpar</button></header>
+<nav id="nv"></nav><nav id="sn" class="sub"></nav>
+<div class="bar" id="fb">Período:
+<select id="mi"></select><select id="yi"></select> até <select id="mf"></select><select id="yf"></select></div>
+<main>
+<div class="pn" id="rg"><div class="card"><div class="badge">TOTAL DE<br>NOTIFICAÇÕES<b id="rgt"></b></div><h2 id="rgh"></h2><h3>Notificações de Ocorrências</h3><div class="cv" style="height:320px"><canvas id="c1"></canvas></div><div class="cap">Setores que mais notificam.</div></div></div>
+<div class="pn" id="bg"><div class="card"><div class="badge">TOTAL DE<br>NOTIFICAÇÕES<b id="bgt"></b></div><h2 id="bgh"></h2><h3>Notificações de Ocorrências</h3><div class="cv"><canvas id="c2"></canvas></div><div class="cap">Gráfico 1: Progressão mensal das notificações totais.</div></div>
+<div class="g2"><div class="card"><div class="cv"><canvas id="c3"></canvas></div><div class="cap">Gráfico 2: Distribuição das notificações realizadas de acordo com o incidente (coluna N).</div></div>
+<div class="card"><div class="cv"><canvas id="c4"></canvas></div><div class="cap">Gráfico 3: Setores mais notificantes.</div></div></div></div>
+<div class="pn" id="bs"><div class="bar" style="padding:0">Setor: <select id="se" style="min-width:320px"></select></div>
+<div class="card"><div class="badge">TOTAL DE<br>NOTIFICAÇÕES<br>REALIZADAS<b id="bst"></b></div><h2 id="bsh"></h2><h3>Notificações de Ocorrências</h3><div class="cv"><canvas id="c5"></canvas></div><div class="cap">Gráfico 1: Autonotificação (G = H), notificações realizadas e recebidas.</div></div>
+<div class="g2"><div class="card"><div class="cv"><canvas id="c6"></canvas></div><div class="cap">Gráfico 2: Distribuição das notificações realizadas de acordo com o fato ocorrido (coluna V).</div></div>
+<div class="card"><div class="cv"><canvas id="c7"></canvas></div><div class="cap">Gráfico 3: Progressão mensal das notificações realizadas.</div></div></div></div>
+<div class="pn" id="rd"><div class="bar" style="padding:0">Ano: <select id="ry"></select> Mês: <select id="rm"></select> Considerar "notificou pouco" até: <input id="rl" type="number" min="1" value="5" style="width:70px"> notificações</div>
+<div class="card"><h2 id="rdh"></h2><h3>Setores que não notificaram</h3><div id="rz"></div></div>
+<div class="card"><h3>Setores que notificam com pouca frequência</h3><div id="rw"></div></div></div>
+<div class="pn" id="tp"><div class="card"><h2>Top 10 – Setores que mais notificaram</h2><div class="cv" style="height:340px"><canvas id="c8"></canvas></div><div id="t10"></div></div></div>
+<div class="pn" id="an"><div class="card"><h2>Notificações por analista</h2><h3 id="anh"></h3><div id="ant"></div></div></div>
+<p id="em" class="mu" style="display:none">Suba a planilha "relatório" (.xls ou .xlsx) para começar. Os dados ficam apenas neste navegador.</p>
+</main>
+<script>
+const SUP={"NUCLEO QUALIDADE E SEGURANÇA":"SG","COMPLIANCE":"SG","COMISSAO DE CURATIVOS":"SAS","OPME CENTRAL":"SAS","FATURAMENTO HOSPITALAR":"SAS","NUCLEO INTERNO DE REGULACAO - NIR":"SAS","NÚCLEO INTERNO DE REGULAÇÃO AMBULATORIAL - NIRA":"SAS","CENTRAL AGENDAMENTO CIRURGICO":"SAS","NECROTERIO":"SAS","CCIH - COM CONT INFECCAO HOSP":"SAS","HIGIENIZACAO E CONSERVACAO":"SAS","HOTELARIA HOSPITALAR":"SAS","AGENCIA TRANSFUSIONAL":"SAS","MEDICINA NUCLEAR":"SAS","CETREIM":"SAS","CME - CENTRAL MAT ESTERILIZADO":"SAS","LABORATORIO DE ANALISES CLINICAS":"SAS","LABORATORIO DE ANALISES PATOLOGICA":"SAS","RADIOTERAPIA I":"SAS","CENTRAL DE MAQUEIROS":"SAS","RECEPCAO DE IMAGEM":"SAS","SAME - SERV ARQUIVO MEDICO":"SAS","SPR - PROCESSAMENTO DE ROUPAS":"SAS","SINT - CENTRO DIAGNOSTICO":"SAS","SINT - IMAGINOLOGIA":"SAS","SINT - NEFROLOGIA ADULTO":"SAS","CENTRO DE REABILITACAO":"SAS","RADIOLOGIA":"SAS","SERVICO SOCIAL":"SAS","NUTRICAO":"SAS","PSICOLOGIA":"SAS","UTI COVID IV":"SAS","UI ENF.CLINICA MEDICA I":"SAS","UTI COVID II":"SAS","UTI COVID PEDIATRICA":"SAS","CENTRO DE PARTO NORMAL":"SAS","PRONTO ATENDIMENTO OBSTETRICA":"SAS","UI ONCO PEDIATRICA 1ºAND":"SAS","BANCO DE LEITE HUMANO":"SAS","UI NEFRO / HEPATO":"SAS","UI NEFROLOGIA PEDIATRICA":"SAS","UI ONCO PEDIATRICA 2ºAND":"SAS","UI TMO-TRANSP. MED OSSEA":"SAS","UTI DE TRANSPLANTE":"SAS","BRAQUITERAPIA":"SAS","HOSPITAL DIA TRANSPLANTE":"SAS","RECEPCAO DE INTERNACAO":"SAS","UI ALOJAMENTO TARDIO":"SAS","UI CLINICA MEDICA II":"SAS","UI PREMATURO CANGURU":"SAS","UTI ADULTO CIRURGICA III":"SAS","AMB DE IMUNIZACOES":"SAS","AMB DO CADEFI":"SAS","HEMODINAMICA":"SAS","LABORATORIO DE BIOLOGIA MOLECULAR":"SAS","BLOCO OBSTETRICO":"SAS","BLOCO CIRURGICO HGP":"SAS","BLOCO CIRURGICO OSCAR COUTINHO":"SAS","PRONTO SOCORRO ADULTO":"SAS","AMB DE ONCOLOGIA ADULTO":"SAS","AMBULATORIO GERAL":"SAS","UI HEMATOLOGIA":"SAS","UI ONCO PEDIATRICA 4ºAND":"SAS","UI CARDIO PEDIATRIA":"SAS","UI CARDIOLOGIA ADULTO":"SAS","UI CIRURGIA PEDIATRICA":"SAS","UI COVID PEDIATRICA":"SAS","UI CUIDADOS PALIATIVOS":"SAS","UI ENFERMARIA CIRURGICA":"SAS","UI GESTACAO PATOLOGICA":"SAS","UI GINECOLOGIA":"SAS","UI HOSPITAL GERAL PEDIATRIA 3":"SAS","UI HOSPITAL GERAL PEDIATRIA 4":"SAS","UI ONCOLOGIA ADULTO":"SAS","UI PUERPERIO / ALOJ.CONJ":"SAS","UNID INT CLIN CIRURGICA - FGH":"SAS","UTI ADULTO CIRURGICA I":"SAS","UTI ADULTO CIRURGICA II":"SAS","UTI ADULTO CLINICA I":"SAS","UTI CARDIO PEDIATRICA":"SAS","UTI NEONATAL":"SAS","UTI OBSTETRICA":"SAS","UTI ONCOLOGIA - PEDIATRICA":"SAS","UTI PEDIATRICA":"SAS","TERAPIA RENAL DE ADULTO":"SAS","TERAPIA RENAL PEDIATRICA":"SAS","TIME DE CATETER":"SAS","BANCO DE OLHOS":"SAS","AMB DE ONCOLOGIA PEDIATRICA":"SAS","NEPI - NUCLEO DE EPIDEMIOLOGIA":"SAS","ENFERMARIA DA UGT":"SAS","HOSPITAL DIA I":"SAS","AMB - NAT - ONCO":"SAS","PRONTO ATENDIMENTO EMERGENCIA PEDIATRICA":"SAS","SALA DE PRE PARTO":"SAS","BLOCO CIRURGICO PEDRO II":"SAS","CIHDOTT":"SAS","AMB DE ODONTOLOGIA":"SAS","PORTARIA E RECEPCAO":"SO","ADMINISTRACAO DE PESSOAL":"SO","MANUTENCAO":"SO","TRANSPORTE":"SO","ENGENHARIA CLINICA":"SO","SINT - MANUTENCAO":"SO","CENTRAL DE DILUICAO ONCOLOGIA":"SAF","CAF - CENTRAL DE ABAST. FARMACEUTICO":"SAF","CENTRAL DE DOSE UNITARIO":"SAF","FARMACIA CENTRAL":"SAF","FARMACIA DI - DISPENSACAO INTERNA":"SAF","FARMACIA SATELITE BLOCO CIR. ADULTO":"SAF","FARMACIA SATELITE EMERG PEDIATRICA":"SAF","FARMACIA SATELITE MATERNIDADE":"SAF","FARMACIA SATELITE OSCAR COUTINHO":"SAF","FARMACIA SATELITE AMBULATORIAL":"SAF","FARMACIA SATELITE BL CIR. PEDRO II":"SAF","FARMACIA SATELITE BLOCO HGP":"SAF","FARMACIA SATELITE BLOCO OBSTETRICO":"SAF","FARMACIA SATELITE BLOCO TRANSPLANTE":"SAF","FARMACIA SATELITE EMERGENCIA OBSTETRICA":"SAF","FARMACIA SATELITE EMERGENCIA PEDIATRICA":"SAF","FARMACIA SATELITE HEMODINAMICA":"SAF","FARMACIA SATELITE HGP 2":"SAF","FARMACIA SATELITE PEDRO II":"SAF","FARMACIA SATELITE PRONTO ATENDIMENTO":"SAF","CENTRAL NUT PARENTERAL":"SAF","ALMOXARIFADO":"SAF","CENTRAL DE ABASTECIMENTO FARMACEUTICO":"SAF","COMPRAS":"SAF","FARMACIA CLINICA":"SAF","DISPENSAÇÃO INTERNA":"SAF"};
+const MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const COL={b:'#3260AD',bd:'#1B3F7A',t:'#156082',ser:['#15566F','#1E6985','#6F8299','#AEB8C4'],pie:['#15566F','#1E6985','#4F8FA6','#6F8299','#AEB8C4'],inc:'#4A90E2'};
+const $=i=>document.getElementById(i),nz=s=>String(s==null?'':s).replace(/\s+/g,' ').trim().toUpperCase();
+let D=[],cur='rg',CH={};
+Chart.register(ChartDataLabels);Chart.defaults.font.family="'Courier New',monospace";Chart.defaults.plugins.datalabels.display=false;
+const idb=()=>new Promise((r,j)=>{const q=indexedDB.open('relnot',1);q.onupgradeneeded=()=>q.result.createObjectStore('k');q.onsuccess=()=>r(q.result);q.onerror=j});
+const dbGet=async()=>{const d=await idb();return new Promise(r=>{const q=d.transaction('k').objectStore('k').get('rows');q.onsuccess=()=>r(q.result||[]);q.onerror=()=>r([])})};
+const dbSet=async v=>{const d=await idb();return new Promise(r=>{const t=d.transaction('k','readwrite');t.objectStore('k').put(v,'rows');t.oncomplete=r})};
+function pd(v){if(v instanceof Date&&!isNaN(v))return new Date(v.getTime()+432e5);const m=String(v).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);return m?new Date(+m[3],m[2]-1,+m[1],12):null}
+$('fi').onchange=async e=>{const map=new Map(D.map(r=>[r.c,r]));
+ for(const f of e.target.files){const wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:true});
+  for(const r of XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true}).slice(1)){const d=pd(r[8]);if(!d||!r[6])continue;const y=d.getFullYear(),m=d.getMonth(),c=r[2]??('x'+map.size);
+   map.set(c,{c,y,m,k:y*12+m,s:nz(r[6]),t:nz(r[7]),n:String(r[13]||'').split(' - ')[0].trim().toUpperCase(),f:String(r[21]||'').trim(),a:String(r[22]||'').trim().toLowerCase()})}}
+ D=[...map.values()];await dbSet(D);e.target.value='';init()};
+const A=()=>+$('yi').value*12+ +$('mi').value,B=()=>+$('yf').value*12+ +$('mf').value,F=()=>D.filter(r=>r.k>=A()&&r.k<=B());
+const fk=k=>MN[k%12]+' de '+Math.floor(k/12);
+const pe=()=>{const a=A(),b=B();return a==b?fk(a):Math.floor(a/12)==Math.floor(b/12)?MN[a%12]+' a '+fk(b):fk(a)+' a '+fk(b)};
+const ml=k=>MN[k%12].slice(0,3).toUpperCase()+(Math.floor(A()/12)!=Math.floor(B()/12)?'/'+String(Math.floor(k/12)).slice(2):'');
+const ks=()=>{const o=[];for(let k=A();k<=B();k++)o.push(k);return o};
+const tally=(a,fn)=>{const m={};a.forEach(r=>{const k=fn(r);if(k)m[k]=(m[k]||0)+1});return Object.entries(m).sort((x,y)=>y[1]-x[1])};
+const wrap=s=>{const o=[];let l='';s.split(' ').forEach(w=>{if((l+' '+w).length>16&&l){o.push(l);l=w}else l=l?l+' '+w:w});o.push(l);return o};
+const mk=(id,cfg)=>{CH[id]&&CH[id].destroy();CH[id]=new Chart($(id),cfg)};
+const barC=(lab,dat,o={})=>({type:'bar',data:{labels:lab.map(wrap),datasets:[{data:dat,backgroundColor:o.col||COL.b,borderColor:COL.bd,borderWidth:2,barPercentage:.35}]},options:{indexAxis:o.h?'y':'x',maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:true,anchor:'end',align:o.h?'right':'top',formatter:o.fmt||(v=>v)}},scales:{x:{display:!!o.h?false:true,grid:{display:false}},y:{display:!!o.h,beginAtZero:true,grace:'12%',grid:{display:false}}}}});
+const lineC=(lab,dat)=>({type:'line',data:{labels:lab,datasets:[{data:dat,borderColor:COL.t,backgroundColor:COL.t,borderWidth:3,pointRadius:3,tension:0}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:true,align:'top',anchor:'end'}},scales:{y:{display:false,beginAtZero:true,grace:'15%'},x:{grid:{display:true}}}}});
+function T(box,head,rows,name){$(box).innerHTML='<button class="x" id="b_'+box+'">Exportar Excel</button><table><tr>'+head.map(h=>'<th>'+h+'</th>').join('')+'</tr>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</table>'+(rows.length?'':'<p class="mu">Nenhum setor.</p>');
+ $('b_'+box).onclick=()=>{const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([head,...rows]),'Dados');XLSX.writeFile(wb,name+'.xlsx')}}
+const R={
+rg(){const f=F();$('rgh').textContent='Resumo Geral – '+pe();$('rgt').textContent=f.length;const t=tally(f,r=>r.s).slice(0,5);mk('c1',barC(t.map(x=>x[0]),t.map(x=>x[1])))},
+bg(){const f=F(),k=ks();$('bgh').textContent='Boletim Geral da Qualidade – '+pe();$('bgt').textContent=f.length;
+ mk('c2',lineC(k.map(ml),k.map(x=>f.filter(r=>r.k==x).length)));
+ const n=tally(f,r=>r.n);mk('c3',barC(n.map(x=>x[0]),n.map(x=>f.length?x[1]/f.length*100:0),{col:COL.inc,fmt:v=>v.toFixed(2).replace('.',',')+'%'}));
+ const t=tally(f,r=>r.s).slice(0,5);mk('c4',barC(t.map(x=>x[0]),t.map(x=>x[1])))},
+bs(){const s=$('se').value,k=ks(),f=F();$('bsh').textContent=s+' – '+pe();
+ const real=f.filter(r=>r.s==s);$('bst').textContent=real.length;
+ mk('c5',{type:'bar',data:{labels:['Autonotificação','Notificações Realizadas','Notificações Recebidas'],datasets:k.map((x,i)=>({label:ml(x),backgroundColor:COL.ser[i%4],data:[real.filter(r=>r.k==x&&r.t==s).length,real.filter(r=>r.k==x).length,f.filter(r=>r.k==x&&r.t==s).length]}))},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom'},datalabels:{display:true,anchor:'end',align:'top'}},scales:{y:{display:false,beginAtZero:true,grace:'12%'},x:{grid:{display:false}}}}});
+ let p=tally(real,r=>r.f.replace(/^\d+\s*-\s*/,''));if(p.length>4){const o=p.slice(4).reduce((a,x)=>a+x[1],0);p=[...p.slice(0,4),['OUTROS',o]]}
+ mk('c6',{type:'pie',data:{labels:p.map(x=>x[0]),datasets:[{data:p.map(x=>x[1]),backgroundColor:COL.pie,borderColor:'#fff'}]},options:{maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10}}},datalabels:{display:true,color:'#fff',font:{weight:'bold'},formatter:(v,c)=>Math.round(v/c.dataset.data.reduce((a,b)=>a+b,0)*100)+'%'}}}});
+ mk('c7',lineC(k.map(ml),k.map(x=>real.filter(r=>r.k==x).length)))},
+rd(){const y=+$('ry').value,m=$('rm').value,L=+$('rl').value,c={};D.filter(r=>r.y==y&&(m===''||r.m==m)).forEach(r=>c[r.s]=(c[r.s]||0)+1);
+ $('rdh').textContent='Radar Cultura da Notificação – '+(m===''?'Ano de '+y:MN[m]+' de '+y);
+ const rows=[...new Set([...Object.keys(SUP),...Object.keys(c)])].map(s=>[SUP[s]||'SEM SUPERINTENDÊNCIA',s,c[s]||0]);
+ const o=(a,b)=>a[0].localeCompare(b[0])||a[2]-b[2]||a[1].localeCompare(b[1]),nm='radar_'+y+(m===''?'':'_'+(+m+1));
+ T('rz',['Superintendência','Setor','Notificações'],rows.filter(r=>!r[2]).sort(o),nm+'_sem_notificacao');
+ T('rw',['Superintendência','Setor','Notificações'],rows.filter(r=>r[2]>0&&r[2]<=L).sort(o),nm+'_pouca_frequencia')},
+tp(){const t=tally(F(),r=>r.s).slice(0,10);mk('c8',barC(t.map(x=>x[0]),t.map(x=>x[1]),{h:true}));T('t10',['#','Setor','Notificações'],t.map((x,i)=>[i+1,x[0],x[1]]),'top10_setores')},
+an(){const nm=e=>e?e.split('@')[0].split('.').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' '):'(não informado)',t=tally(F().map(r=>({a:nm(r.a)})),r=>r.a);$('anh').textContent=pe();T('ant',['Analista','Notificações'],t,'notificacoes_por_analista')}};
+const NAV=[['Boletim','rg'],['Radar','rd'],['Top 10','tp'],['Analistas','an']],SUBS=[['Relatório geral','rg'],['Boletim geral','bg'],['Boletim por setor','bs']];
+function go(id){cur=id;const bol=['rg','bg','bs'].includes(id);document.querySelectorAll('.pn').forEach(p=>p.classList.toggle('on',p.id==id));
+ $('nv').innerHTML='';NAV.forEach(([l,i])=>{const b=document.createElement('button');b.textContent=l;b.className=(i==id||(bol&&i=='rg'))?'on':'';b.onclick=()=>go(i);$('nv').append(b)});
+ $('sn').style.display=bol?'flex':'none';$('sn').innerHTML='';SUBS.forEach(([l,i])=>{const b=document.createElement('button');b.textContent=l;b.className=i==id?'on':'';b.onclick=()=>go(i);$('sn').append(b)});
+ $('fb').style.display=id=='rd'?'none':'flex';D.length&&R[id]()}
+const opt=(el,a,sel)=>{$(el).innerHTML=a.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');if(sel!=null)$(el).value=sel};
+function init(){$('em').style.display=D.length?'none':'block';
+ if(!D.length){$('st').textContent='Nenhum dado carregado';go(cur);return}
+ const ys=[...new Set(D.map(r=>r.y))].sort(),ms=MN.map((m,i)=>[i,m]),ky=D.map(r=>r.k),lo=Math.min(...ky),hi=Math.max(...ky);
+ opt('mi',ms,lo%12);opt('mf',ms,hi%12);opt('yi',ys.map(y=>[y,y]),Math.floor(lo/12));opt('yf',ys.map(y=>[y,y]),Math.floor(hi/12));
+ opt('ry',ys.map(y=>[y,y]),ys[ys.length-1]);opt('rm',[['','Ano inteiro'],...ms],hi%12);$('rl').value=5;
+ $('st').textContent=D.length.toLocaleString('pt-BR')+' notificações ('+fk(lo)+' a '+fk(hi)+')';fillSe();go(cur)}
+function fillSe(){if(!D.length)return;const prev=$('se').value,s=[...new Set(F().flatMap(r=>[r.s,r.t]))].filter(Boolean).sort();opt('se',s.map(x=>[x,x]),s.includes(prev)?prev:s[0])}
+['mi','yi','mf','yf'].forEach(i=>$(i).onchange=()=>{fillSe();R[cur]()});$('se').onchange=()=>R.bs();
+['ry','rm','rl'].forEach(i=>$(i).onchange=()=>{if(i=='rm')$('rl').value=$('rm').value===''?10:5;R.rd()});
+dbGet().then(d=>{D=d;init()});
+</script></body></html>
