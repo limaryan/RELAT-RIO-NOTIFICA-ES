@@ -1,4 +1,4 @@
-# RELATÓRIO NOTIFICAÇÕES
+# RELATÓRIO NOTIFICAÇÕES (v1.1.2)
 
 Aplicação web (HTML/JS puro) com Boletim, Radar, Top 10 e Analistas.
 
