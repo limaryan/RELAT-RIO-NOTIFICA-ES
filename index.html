@@ -13,19 +13,19 @@ nav{padding:8px 24px;display:flex;gap:8px;flex-wrap:wrap}.sub{background:#f1f5fb
 .bar{padding:8px 24px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
 main{padding:12px 24px 40px}.pn{display:none}.pn.on{display:block}
 .card{border:2px solid var(--bd);border-radius:26px;padding:14px 18px;margin:12px 0;position:relative}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:800px){.g2{grid-template-columns:1fr}}
-.cv{position:relative;height:270px}.cap{font:12px "Courier New",monospace;color:#333;margin-top:6px}
+.g2{display:grid;grid-template-columns:1fr;gap:14px}body.side .g2{grid-template-columns:1fr 1fr}@media(max-width:800px){body.side .g2{grid-template-columns:1fr}}
+.cv{position:relative;height:300px;max-width:100%;min-width:260px;min-height:180px;resize:both;overflow:hidden}.cap{font:12px "Courier New",monospace;color:#333;margin-top:6px}
 .badge{position:absolute;top:-14px;right:18px;background:#2F5FAE;color:#fff;border-radius:50%/60%;padding:10px 26px;text-align:center;font-size:11px;font-weight:700}
 .badge b{display:block;font-size:24px}
 table{border-collapse:collapse;width:100%;font-size:14px;margin-top:8px}th{background:var(--b);color:#fff;text-align:left}th,td{padding:6px 10px;border-bottom:1px solid var(--ln)}
 .mu{color:var(--mu)}.tot{font-weight:700;color:var(--b);text-align:center;margin-top:8px}
 </style></head><body>
-<header><h1>RELATÓRIO NOTIFICAÇÕES <small style="font-size:12px;color:#6b7686">v1.1.2</small></h1><span class="sp"></span><span id="st" class="mu"></span>
+<header><h1>RELATÓRIO NOTIFICAÇÕES <small style="font-size:12px;color:#6b7686">v1.2.0</small></h1><span class="sp"></span><span id="st" class="mu"></span>
 <button class="x" onclick="$('fi').click()">Subir planilha relatório</button><input id="fi" type="file" accept=".xls,.xlsx" multiple hidden>
 <button onclick="if(confirm('Apagar dados salvos neste navegador?')){D=[];dbSet([]).then(init)}">Limpar</button></header>
 <nav id="nv"></nav><nav id="sn" class="sub"></nav>
 <div class="bar" id="fb">Período:
-<select id="mi"></select><select id="yi"></select> até <select id="mf"></select><select id="yf"></select></div>
+<select id="mi"></select><select id="yi"></select> até <select id="mf"></select><select id="yf"></select> <span class="sp"></span><label><input type="checkbox" id="ld" onchange="document.body.classList.toggle('side',this.checked)"> Gráficos lado a lado</label><button onclick="document.querySelectorAll('.cv').forEach(e=>{e.style.width='';e.style.height=''})">Restaurar tamanhos</button><span class="mu">Arraste o canto inferior direito de cada gráfico para redimensionar.</span></div>
 <main>
 <div class="pn" id="rg"><div class="card"><div class="badge">TOTAL DE<br>NOTIFICAÇÕES<b id="rgt"></b></div><h2 id="rgh"></h2><h3>Notificações de Ocorrências</h3><div class="cv" style="height:320px"><canvas id="c1"></canvas></div><div class="cap">Setores que mais notificam.</div></div></div>
 <div class="pn" id="bg"><div class="card"><div class="badge">TOTAL DE<br>NOTIFICAÇÕES<b id="bgt"></b></div><h2 id="bgh"></h2><h3>Notificações de Ocorrências</h3><div class="cv"><canvas id="c2"></canvas></div><div class="cap">Gráfico 1: Progressão mensal das notificações totais.</div></div>
@@ -64,9 +64,9 @@ const pe=()=>{const a=A(),b=B();return a==b?fk(a):Math.floor(a/12)==Math.floor(b
 const ml=k=>MN[k%12].slice(0,3).toUpperCase()+(Math.floor(A()/12)!=Math.floor(B()/12)?'/'+String(Math.floor(k/12)).slice(2):'');
 const ks=()=>{const o=[];for(let k=A();k<=B();k++)o.push(k);return o};
 const tally=(a,fn)=>{const m={};a.forEach(r=>{const k=fn(r);if(k)m[k]=(m[k]||0)+1});return Object.entries(m).sort((x,y)=>y[1]-x[1])};
-const wrap=s=>{const o=[];let l='';s.split(' ').forEach(w=>{if((l+' '+w).length>16&&l){o.push(l);l=w}else l=l?l+' '+w:w});o.push(l);return o};
+const wrap=s=>{const o=[];let l='';s.split(' ').forEach(w=>{if((l+' '+w).length>14&&l){o.push(l);l=w}else l=l?l+' '+w:w});o.push(l);return o};
 const mk=(id,cfg)=>{CH[id]&&CH[id].destroy();CH[id]=new Chart($(id),cfg)};
-const barC=(lab,dat,o={})=>({type:'bar',data:{labels:lab.map(wrap),datasets:[{data:dat,backgroundColor:o.col||COL.b,borderColor:COL.bd,borderWidth:2,barPercentage:.35}]},options:{indexAxis:o.h?'y':'x',maintainAspectRatio:false,layout:{padding:{top:30,right:o.h?44:8}},plugins:{legend:{display:false},datalabels:{display:true,clip:false,anchor:'end',align:o.h?'right':'top',formatter:o.fmt||(v=>v)}},scales:{x:{display:!!o.h?false:true,grid:{display:false}},y:{display:!!o.h,beginAtZero:true,grace:'12%',grid:{display:false}}}}});
+const barC=(lab,dat,o={})=>({type:'bar',data:{labels:lab.map(wrap),datasets:[{data:dat,backgroundColor:o.col||COL.b,borderColor:COL.bd,borderWidth:2,barPercentage:.35}]},options:{indexAxis:o.h?'y':'x',maintainAspectRatio:false,layout:{padding:{top:30,right:o.h?44:8}},plugins:{legend:{display:false},datalabels:{display:true,clip:false,anchor:'end',align:o.h?'right':'top',formatter:o.fmt||(v=>v)}},scales:{x:{display:!!o.h?false:true,grid:{display:false},ticks:{autoSkip:false,maxRotation:0,font:{size:o.fs||11}}},y:{display:!!o.h,beginAtZero:true,grace:'12%',grid:{display:false},ticks:{autoSkip:false}}}}});
 const lineC=(lab,dat)=>({type:'line',data:{labels:lab,datasets:[{data:dat,borderColor:COL.t,backgroundColor:COL.t,borderWidth:3,pointRadius:3,tension:0}]},options:{maintainAspectRatio:false,layout:{padding:{top:30,right:14}},plugins:{legend:{display:false},datalabels:{display:true,clip:false,align:'top',anchor:'end'}},scales:{y:{display:false,beginAtZero:true,grace:'15%'},x:{grid:{display:true}}}}});
 function T(box,head,rows,name){$(box).innerHTML='<button class="x" id="b_'+box+'">Exportar Excel</button><table><tr>'+head.map(h=>'<th>'+h+'</th>').join('')+'</tr>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</table>'+(rows.length?'':'<p class="mu">Nenhum setor.</p>');
  $('b_'+box).onclick=()=>{const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([head,...rows]),'Dados');XLSX.writeFile(wb,name+'.xlsx')}}
@@ -74,7 +74,7 @@ const R={
 rg(){const f=F();$('rgh').textContent='Resumo Geral – '+pe();$('rgt').textContent=f.length;const t=tally(f,r=>r.s).slice(0,5);mk('c1',barC(t.map(x=>x[0]),t.map(x=>x[1])))},
 bg(){const f=F(),k=ks();$('bgh').textContent='Boletim Geral da Qualidade – '+pe();$('bgt').textContent=f.length;
  mk('c2',lineC(k.map(ml),k.map(x=>f.filter(r=>r.k==x).length)));
- const n=tally(f,r=>r.n);mk('c3',barC(n.map(x=>x[0]),n.map(x=>f.length?x[1]/f.length*100:0),{col:COL.inc,fmt:v=>v.toFixed(2).replace('.',',')+'%'}));
+ const n=tally(f,r=>r.n);mk('c3',barC(n.map(x=>x[0]),n.map(x=>f.length?x[1]/f.length*100:0),{fs:10,col:COL.inc,fmt:v=>v.toFixed(2).replace('.',',')+'%'}));
  const t=tally(f,r=>r.s).slice(0,5);mk('c4',barC(t.map(x=>x[0]),t.map(x=>x[1])))},
 bs(){const s=$('se').value,k=ks(),f=F();$('bsh').textContent=s+' – '+pe();
  const real=f.filter(r=>r.s==s);$('bst').textContent=real.length;

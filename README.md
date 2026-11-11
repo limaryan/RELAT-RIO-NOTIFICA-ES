@@ -1,4 +1,4 @@
-# RELATÓRIO NOTIFICAÇÕES (v1.1.2)
+# RELATÓRIO NOTIFICAÇÕES (v1.2.0)
 
 Aplicação web (HTML/JS puro) com Boletim, Radar, Top 10 e Analistas.
 
@@ -13,3 +13,6 @@ Aplicação web (HTML/JS puro) com Boletim, Radar, Top 10 e Analistas.
 - Os dados ficam só no navegador (IndexedDB). NÃO envie as planilhas ao GitHub: contêm registros de pacientes.
 - Requer internet para carregar Chart.js e SheetJS (CDN).
 - Superintendências: embutidas no `index.html` (variável `SUP`).
+
+## Gráficos
+Cada gráfico pode ser redimensionado arrastando o canto inferior direito. Use "Gráficos lado a lado" para alternar o layout e "Restaurar tamanhos" para voltar ao padrão.
