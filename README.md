@@ -1,4 +1,4 @@
-# RELATÓRIO NOTIFICAÇÕES (v1.2.2)
+# RELATÓRIO NOTIFICAÇÕES (v1.3.0)
 
 Aplicação web (HTML/JS puro) com Boletim, Radar, Top 10 e Analistas.
 
@@ -16,3 +16,6 @@ Aplicação web (HTML/JS puro) com Boletim, Radar, Top 10 e Analistas.
 
 ## Gráficos
 Cada gráfico pode ser redimensionado arrastando o canto inferior direito. Use "Gráficos lado a lado" para alternar o layout e "Restaurar tamanhos" para voltar ao padrão.
+
+## Aba Setores
+Lista todos os setores com notificações realizadas, autonotificações e recebidas, filtrável por ano e mês, com busca por nome e exportação para Excel.

@@ -20,7 +20,7 @@ main{padding:12px 24px 40px}.pn{display:none}.pn.on{display:block}
 table{border-collapse:collapse;width:100%;font-size:14px;margin-top:8px}th{background:var(--b);color:#fff;text-align:left}th,td{padding:6px 10px;border-bottom:1px solid var(--ln)}
 .mu{color:var(--mu)}.tot{font-weight:700;color:var(--b);text-align:center;margin-top:8px}
 </style></head><body>
-<header><h1>RELATÓRIO NOTIFICAÇÕES <small style="font-size:12px;color:#6b7686">v1.2.2</small></h1><span class="sp"></span><span id="st" class="mu"></span>
+<header><h1>RELATÓRIO NOTIFICAÇÕES <small style="font-size:12px;color:#6b7686">v1.3.0</small></h1><span class="sp"></span><span id="st" class="mu"></span>
 <button class="x" onclick="$('fi').click()">Subir planilha relatório</button><input id="fi" type="file" accept=".xls,.xlsx" multiple hidden>
 <button onclick="if(confirm('Apagar dados salvos neste navegador?')){D=[];dbSet([]).then(init)}">Limpar</button></header>
 <nav id="nv"></nav><nav id="sn" class="sub"></nav>
@@ -38,6 +38,7 @@ table{border-collapse:collapse;width:100%;font-size:14px;margin-top:8px}th{backg
 <div class="pn" id="rd"><div class="bar" style="padding:0">Ano: <select id="ry"></select> Mês: <select id="rm"></select> Considerar "notificou pouco" até: <input id="rl" type="number" min="1" value="5" style="width:70px"> notificações</div>
 <div class="card"><h2 id="rdh"></h2><h3>Setores que não notificaram</h3><div id="rz"></div></div>
 <div class="card"><h3>Setores que notificam com pouca frequência</h3><div id="rw"></div></div></div>
+<div class="pn" id="st"><div class="bar" style="padding:0">Ano: <select id="sy"></select> Mês: <select id="sm"></select> Buscar: <input id="sq" placeholder="Nome do setor"></div><div class="card"><h2 id="sth"></h2><div id="stt"></div></div></div>
 <div class="pn" id="tp"><div class="card"><h2>Top 10 – Setores que mais notificaram</h2><div class="cv" style="height:340px"><canvas id="c8"></canvas></div><div id="t10"></div></div></div>
 <div class="pn" id="an"><div class="card"><h2>Notificações por analista</h2><h3 id="anh"></h3><div id="ant"></div></div></div>
 <p id="em" class="mu" style="display:none">Suba a planilha "relatório" (.xls ou .xlsx) para começar. Os dados ficam apenas neste navegador.</p>
@@ -80,7 +81,8 @@ bs(){const s=$('se').value,k=ks(),f=F();$('bsh').textContent=s+' – '+pe();
  const real=f.filter(r=>r.s==s);$('bst').textContent=real.length;
  mk('c5',{type:'bar',data:{labels:['Autonotificação','Notificações Realizadas','Notificações Recebidas'],datasets:k.map((x,i)=>({label:ml(x),backgroundColor:COL.ser[i%4],data:[real.filter(r=>r.k==x&&r.t==s).length,real.filter(r=>r.k==x).length,f.filter(r=>r.k==x&&r.t==s).length]}))},options:{maintainAspectRatio:false,layout:{padding:{top:30}},plugins:{legend:{position:'bottom'},datalabels:{display:true,clip:false,anchor:'end',align:'top'}},scales:{y:{display:false,beginAtZero:true,grace:'12%'},x:{grid:{display:false}}}}});
  const cf=r=>{const x=r.f.replace(/^\d+\s*-\s*/,'');return /^[-–\s]*$/.test(x)?'':x};let p=tally(real,cf);const o=p.slice(4).reduce((s,x)=>s+x[1],0)+real.filter(r=>!cf(r)).length;p=p.slice(0,4);if(o)p.push(['OUTROS',o]);
- mk('c6',{type:'pie',data:{labels:p.map(x=>x[0]),datasets:[{data:p.map(x=>x[1]),backgroundColor:COL.pie,borderColor:'#fff'}]},options:{maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:FS-2}}},datalabels:{display:true,color:'#fff',font:{weight:'bold'},formatter:(v,c)=>Math.round(v/c.dataset.data.reduce((a,b)=>a+b,0)*100)+'%'}}}});
+ const pc=(v,c)=>v/c.dataset.data.reduce((a,b)=>a+b,0)*100,sm=c=>pc(c.dataset.data[c.dataIndex],c)<8;
+ mk('c6',{type:'pie',data:{labels:p.map(x=>x[0]),datasets:[{data:p.map(x=>x[1]),backgroundColor:COL.pie,borderColor:'#fff'}]},options:{maintainAspectRatio:false,layout:{padding:34},plugins:{legend:{position:'right',labels:{font:{size:FS-2},generateLabels:ch=>{const d=ch.data.datasets[0],t=d.data.reduce((a,b)=>a+b,0);return ch.data.labels.map((l,i)=>({text:l+' – '+(d.data[i]/t*100).toFixed(1).replace('.',',')+'% ('+d.data[i]+')',fillStyle:d.backgroundColor[i],strokeStyle:'#fff',lineWidth:1,hidden:!ch.getDataVisibility(i),index:i}))}}},datalabels:{display:c=>pc(c.dataset.data[c.dataIndex],c)>=3,anchor:c=>sm(c)?'end':'center',align:c=>sm(c)?'end':'center',offset:c=>sm(c)?8:0,color:c=>sm(c)?'#1d2a3a':'#fff',clip:false,formatter:(v,c)=>Math.round(pc(v,c))+'%'}}}});
  mk('c7',lineC(k.map(ml),k.map(x=>real.filter(r=>r.k==x).length)))},
 rd(){const y=+$('ry').value,m=$('rm').value,L=+$('rl').value,c={};D.filter(r=>r.y==y&&(m===''||r.m==m)).forEach(r=>c[r.s]=(c[r.s]||0)+1);
  $('rdh').textContent='Radar Cultura da Notificação – '+(m===''?'Ano de '+y:MN[m]+' de '+y);
@@ -88,22 +90,27 @@ rd(){const y=+$('ry').value,m=$('rm').value,L=+$('rl').value,c={};D.filter(r=>r.
  const o=(a,b)=>a[0].localeCompare(b[0])||a[2]-b[2]||a[1].localeCompare(b[1]),nm='radar_'+y+(m===''?'':'_'+(+m+1));
  T('rz',['Superintendência','Setor','Notificações'],rows.filter(r=>!r[2]).sort(o),nm+'_sem_notificacao');
  T('rw',['Superintendência','Setor','Notificações'],rows.filter(r=>r[2]>0&&r[2]<=L).sort(o),nm+'_pouca_frequencia')},
+st(){const y=+$('sy').value,m=$('sm').value,q=nz($('sq').value),f=D.filter(r=>r.y==y&&(m===''||r.m==m)),c={},g=s=>c[s]||(c[s]=[0,0,0]);
+ f.forEach(r=>{g(r.s)[0]++;if(r.t)g(r.t)[1]++;if(r.s==r.t)g(r.s)[2]++});
+ $('sth').textContent='Notificações por setor – '+(m===''?'Ano de '+y:MN[m]+' de '+y)+' ('+f.length+' no total)';
+ const rows=[...new Set([...Object.keys(SUP),...Object.keys(c)])].filter(s=>!q||s.includes(q)).map(s=>{const v=c[s]||[0,0,0];return [s,SUP[s]||'SEM SUPERINTENDÊNCIA',v[0],v[2],v[1]]}).sort((a,b)=>b[2]-a[2]||a[0].localeCompare(b[0]));
+ T('stt',['Setor','Superintendência','Realizadas','Autonotificação','Recebidas'],rows,'setores_'+y+(m===''?'':'_'+(+m+1)))},
 tp(){const t=tally(F(),r=>r.s).slice(0,10);mk('c8',barC(t.map(x=>x[0]),t.map(x=>x[1]),{h:true}));T('t10',['#','Setor','Notificações'],t.map((x,i)=>[i+1,x[0],x[1]]),'top10_setores')},
 an(){const nm=e=>e?e.split('@')[0].split('.').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' '):'(não informado)',t=tally(F().map(r=>({a:nm(r.a)})),r=>r.a);$('anh').textContent=pe();T('ant',['Analista','Notificações'],t,'notificacoes_por_analista')}};
-const NAV=[['Boletim','rg'],['Radar','rd'],['Top 10','tp'],['Analistas','an']],SUBS=[['Relatório geral','rg'],['Boletim geral','bg'],['Boletim por setor','bs']];
+const NAV=[['Boletim','rg'],['Radar','rd'],['Setores','st'],['Top 10','tp'],['Analistas','an']],SUBS=[['Relatório geral','rg'],['Boletim geral','bg'],['Boletim por setor','bs']];
 function go(id){cur=id;const bol=['rg','bg','bs'].includes(id);document.querySelectorAll('.pn').forEach(p=>p.classList.toggle('on',p.id==id));
  $('nv').innerHTML='';NAV.forEach(([l,i])=>{const b=document.createElement('button');b.textContent=l;b.className=(i==id||(bol&&i=='rg'))?'on':'';b.onclick=()=>go(i);$('nv').append(b)});
  $('sn').style.display=bol?'flex':'none';$('sn').innerHTML='';SUBS.forEach(([l,i])=>{const b=document.createElement('button');b.textContent=l;b.className=i==id?'on':'';b.onclick=()=>go(i);$('sn').append(b)});
- $('fb').style.display=id=='rd'?'none':'flex';D.length&&R[id]()}
+ $('fb').style.display=(id=='rd'||id=='st')?'none':'flex';D.length&&R[id]()}
 const opt=(el,a,sel)=>{$(el).innerHTML=a.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');if(sel!=null)$(el).value=sel};
 function init(){$('em').style.display=D.length?'none':'block';
  if(!D.length){$('st').textContent='Nenhum dado carregado';go(cur);return}
  const ys=[...new Set(D.map(r=>r.y))].sort(),ms=MN.map((m,i)=>[i,m]),ky=D.map(r=>r.k),lo=Math.min(...ky),hi=Math.max(...ky);
  opt('mi',ms,lo%12);opt('mf',ms,hi%12);opt('yi',ys.map(y=>[y,y]),Math.floor(lo/12));opt('yf',ys.map(y=>[y,y]),Math.floor(hi/12));
- opt('ry',ys.map(y=>[y,y]),ys[ys.length-1]);opt('rm',[['','Ano inteiro'],...ms],hi%12);$('rl').value=5;
+ opt('ry',ys.map(y=>[y,y]),ys[ys.length-1]);opt('rm',[['','Ano inteiro'],...ms],hi%12);$('rl').value=5;opt('sy',ys.map(y=>[y,y]),ys[ys.length-1]);opt('sm',[['','Ano inteiro'],...ms],'');
  $('st').textContent=D.length.toLocaleString('pt-BR')+' notificações ('+fk(lo)+' a '+fk(hi)+')';fillSe();go(cur)}
 function fillSe(){if(!D.length)return;const prev=$('se').value,s=[...new Set(F().flatMap(r=>[r.s,r.t]))].filter(Boolean).sort();opt('se',s.map(x=>[x,x]),s.includes(prev)?prev:s[0])}
 ['mi','yi','mf','yf'].forEach(i=>$(i).onchange=()=>{fillSe();R[cur]()});$('se').onchange=()=>R.bs();$('fs').onchange=()=>{FS=+$('fs').value;apFS();D.length&&R[cur]()};
-['ry','rm','rl'].forEach(i=>$(i).onchange=()=>{if(i=='rm')$('rl').value=$('rm').value===''?10:5;R.rd()});
+['sy','sm'].forEach(i=>$(i).onchange=()=>R.st());$('sq').oninput=()=>R.st();['ry','rm','rl'].forEach(i=>$(i).onchange=()=>{if(i=='rm')$('rl').value=$('rm').value===''?10:5;R.rd()});
 dbGet().then(d=>{D=d;init()});
 </script></body></html>
